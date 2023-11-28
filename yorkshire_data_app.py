@@ -13,15 +13,15 @@ main_cols = st.columns((2,4,2))
 with main_cols[0]:
 
     option_main_category = st.selectbox("Main category",
-                                        list(main_categories.keys()))
+                                        list(data.keys())[2:])
     
-    option_sub_category = st.selectbox(option_main_category,
-                                       main_categories[option_main_category])
+    # option_sub_category = st.selectbox(option_main_category,
+    #                                    main_categories[option_main_category])
 
 with main_cols[1]:
     option = st.selectbox("Data display", ("Map view", "Table view", "Comparison"))
 
     if option == "Map view":
-        map = cloropleth_folium_yorkshire(maps_yorkshire)
+        map = cloropleth_folium_yorkshire(maps_yorkshire, data, option_main_category)
         st_data = st_folium(map, use_container_width = True)
 

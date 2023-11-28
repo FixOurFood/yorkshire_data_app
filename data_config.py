@@ -1,7 +1,12 @@
 import pandas as pd
-import streamlit as st
+import numpy as np
 
-data_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRZzN2TqjclsNSGp4GvLkCJtJ0pSyly6aGbesf9vmJ19aUbs7oSxZSwxxLsP-hA5g/pub?gid=741035012&single=true&output=csv"
+data_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTrUrpE22TyzTFUzXJkI4BFqLTPMmqv6MSOmZZ5_e6MaOd15J4H2P40hpntDNICSg/pub?gid=2067425503&single=true&output=csv"
 
-data = pd.read_csv(data_url, nrows=34, index_col=0)
+# read amd get rid of extra rows and columns
+data = pd.read_csv(data_url, header=0, nrows=34, thousands=r',')
 data = data[data.columns[:-1]]
+
+# Keep columns with LAD21NM defined to match agains map data 
+data = data[data["LAD21NM"].notna()]
+

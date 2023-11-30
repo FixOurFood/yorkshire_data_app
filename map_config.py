@@ -28,7 +28,7 @@ yorkshire_council_names = [
 
 maps_yorkshire = maps[maps["LAD21NM"].isin(yorkshire_council_names)]
 
-def cloropleth_folium_yorkshire(gpd, data, key):
+def cloropleth_folium_yorkshire(gpd, data, key, legend_name):
     """Returns a folium cloropleth map from a geopandas boundary dataframe and
     data for each boundary
 
@@ -42,6 +42,8 @@ def cloropleth_folium_yorkshire(gpd, data, key):
         array to use for each row in the geopandas dataframe
     key : string
         Data column name from `data` to map
+    legend_name : string
+        String used for the legend label on top of the plot 
 
     Returns
     -------
@@ -53,7 +55,8 @@ def cloropleth_folium_yorkshire(gpd, data, key):
     map = folium.Map([54, -1.3],
                  zoom_start=8,
                  tiles="Cartodb Positron",
-                 min_zoom=8)
+                 min_zoom=7,
+                 max_zoom=10)
     
     folium.Choropleth(
     geo_data=gpd,
@@ -62,6 +65,8 @@ def cloropleth_folium_yorkshire(gpd, data, key):
     key_on="feature.properties.LAD21NM",
     # fill_opacity=0.1,
     line_weight=0.5,
+    legend_name=legend_name,
+    highlight=True,
     ).add_to(map)
 
     return map

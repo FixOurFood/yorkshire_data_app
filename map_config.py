@@ -76,7 +76,7 @@ def choropleth_folium_yorkshire(geoframe, data, key, legend_label):
 
     tooltip = folium.GeoJsonTooltip(
         fields=["LAD21NM", key],
-        aliases=["Local Autority:", legend_label],
+        aliases=["Local Authority:", legend_label],
         localize=True,
         sticky=True,
         labels=True,

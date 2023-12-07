@@ -2,8 +2,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 from streamlit_folium import st_folium
 
-from map_config import maps_yorkshire, cloropleth_folium_yorkshire
-from gui_config import *
+from map_config import maps_yorkshire, choropleth_folium_yorkshire
 from data_config import data, metadata
 
 def long_str_trunc(label, leng=45):
@@ -47,6 +46,9 @@ main_cols = st.columns((2,4,2))
 # Left side panel: Data selector and notes
 with main_cols[0]:
 
+
+    st.image("images/fof_logo.png")
+
     option_main_category = st.selectbox("Main category",
                                         list(data.keys())[2:],
                                         format_func=long_str_trunc)
@@ -71,7 +73,7 @@ with main_cols[1]:
     option = st.selectbox("Data view", ("Map view", "Table view", "Comparison"))
 
     if option == "Map view":
-        map = cloropleth_folium_yorkshire(maps_yorkshire,
+        map = choropleth_folium_yorkshire(maps_yorkshire,
                                           data,
                                           option_main_category,
                                           info_row["units"].values[0])

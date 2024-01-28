@@ -1,6 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 from streamlit_folium import st_folium
+from streamlit_modal import Modal
 
 from map_config import maps_yorkshire, choropleth_folium_yorkshire
 from data_config import data, metadata
@@ -40,23 +41,25 @@ st.markdown("""
         </style>
         """, unsafe_allow_html=True)
 
+main_category_names = metadata["Main group"].unique()
+
 # Define main columns
 main_cols = st.columns((2,4,2))
 
 # Left side panel: Data selector and notes
 with main_cols[0]:
 
-
     st.image("images/fof_logo.png")
 
-    option_main_category = st.selectbox("Main category",
-                                        list(data.keys())[2:],
-                                        format_func=long_str_trunc)
+    selected_main_category = st.selectbox("Main category", main_category_names)
+
+    indicator_names = metadata[metadata["Main group"] == selected_main_category]["column"]
+    selected_indicator = st.selectbox("Indicator", indicator_names, label_visibility="collapsed")
     
     # Fetch information from metadata
-    info_row = metadata[metadata["column"] == option_main_category]
+    info_row = metadata[metadata["column"] == selected_indicator]
 
-    st.markdown("## " + option_main_category)
+    st.markdown("## " + selected_indicator)
 
     if isinstance(info_row["notes"].values[0], str):
         st.markdown('### Description')
@@ -65,9 +68,6 @@ with main_cols[0]:
     st.markdown(info_row["source_name"].values[0])
     st.markdown(info_row["url"].values[0])     
     
-    # option_sub_category = st.selectbox(option_main_category,
-    #                                    main_categories[option_main_category])
-
 # Center panel: Data view selector and view
 with main_cols[1]:
     option = st.selectbox("Data view", ("Map view", "Table view", "Comparison"))
@@ -75,25 +75,31 @@ with main_cols[1]:
     if option == "Map view":
         map = choropleth_folium_yorkshire(maps_yorkshire,
                                           data,
-                                          option_main_category,
+                                          selected_indicator,
                                           info_row["units"].values[0])
         st_data = st_folium(map, use_container_width = True)
 
     elif option == "Table view":
-        st.dataframe(data[["LAD21NM", option_main_category]],
+        st.dataframe(data[["LAD21NM", selected_indicator]],
                      use_container_width=True,
                      hide_index=True,
                      height=710)
         
     elif option == "Comparison":
-        compare_main_category = st.selectbox("Compare against",
-                                        list(data.keys())[2:],
-                                        format_func=long_str_trunc)
+
+        view_cols = st.columns((3,7))
+
+        with view_cols[0]:
+            compare_main_category = st.selectbox("Compare against",
+                                            main_category_names, label_visibility="collapsed")
+            compare_indicator_names = metadata[metadata["Main group"] == compare_main_category]["column"]
+        with view_cols[1]:
+            compare_indicator = st.selectbox("Compare indicator", compare_indicator_names, label_visibility="collapsed")
         
         f, ax = plt.subplots()
-        ax.plot(data[option_main_category], data[compare_main_category], 'o')
-        ax.set_xlabel(option_main_category)
-        ax.set_ylabel(compare_main_category)
+        ax.plot(data[selected_indicator], data[compare_indicator], 'o')
+        ax.set_xlabel(selected_indicator)
+        ax.set_ylabel(compare_indicator)
 
         st.pyplot(f)
                

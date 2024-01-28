@@ -1,7 +1,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 from streamlit_folium import st_folium
-from streamlit_modal import Modal
 
 from map_config import maps_yorkshire, choropleth_folium_yorkshire
 from data_config import data, metadata

@@ -1,6 +1,8 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 from streamlit_folium import st_folium
+from textwrap import wrap
+from sklearn.linear_model import LinearRegression
 
 from map_config import maps_yorkshire, choropleth_folium_yorkshire
 from data_config import data, metadata
@@ -45,6 +47,7 @@ main_category_names = metadata["Main group"].unique()
 # Define main columns
 main_cols = st.columns((2,4,2))
 
+
 # Left side panel: Data selector and notes
 with main_cols[0]:
 
@@ -57,6 +60,7 @@ with main_cols[0]:
     
     # Fetch information from metadata
     info_row = metadata[metadata["column"] == selected_indicator]
+    units_selected = info_row["units"].values[0]
 
     st.markdown("## " + selected_indicator)
 
@@ -75,7 +79,7 @@ with main_cols[1]:
         map = choropleth_folium_yorkshire(maps_yorkshire,
                                           data,
                                           selected_indicator,
-                                          info_row["units"].values[0])
+                                          units_selected)
         st_data = st_folium(map, use_container_width = True)
 
     elif option == "Table view":
@@ -95,10 +99,22 @@ with main_cols[1]:
         with view_cols[1]:
             compare_indicator = st.selectbox("Compare indicator", compare_indicator_names, label_visibility="collapsed")
         
+        compare_info_row = metadata[metadata["column"] == compare_indicator]
+        compare_units_selected = compare_info_row["units"].values[0]
+
+        X = data[selected_indicator].to_numpy().reshape(-1, 1)
+        Y = data[compare_indicator].to_numpy().reshape(-1, 1)
+
+        reg = LinearRegression().fit(X, Y)
+        Y_exp = reg.predict(X)
+        R = reg.score(X, Y)
+
         f, ax = plt.subplots()
         ax.plot(data[selected_indicator], data[compare_indicator], 'o')
-        ax.set_xlabel(selected_indicator)
-        ax.set_ylabel(compare_indicator)
+        ax.plot(X, Y_exp, color='k', alpha=0.5, label = f"R = {R:.3f}")
+        ax.set_xlabel("\n".join(wrap(selected_indicator + " [" + units_selected + "]", 50)), size=8)
+        ax.set_ylabel("\n".join(wrap(compare_indicator + " [" + compare_units_selected + "]", 50)), size=8)
+        ax.legend()
 
         st.pyplot(f)
                

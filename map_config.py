@@ -30,7 +30,7 @@ yorkshire_council_names = [
 
 maps_yorkshire = maps[maps["LAD21NM"].isin(yorkshire_council_names)]
 
-def choropleth_folium_yorkshire(geoframe, data, key, legend_label):
+def choropleth_folium_yorkshire(geoframe, data, key, legend_label, scale_type="normal"):
     """Returns a folium cloropleth map from a geopandas boundary dataframe and
     data for each boundary
 
@@ -44,7 +44,9 @@ def choropleth_folium_yorkshire(geoframe, data, key, legend_label):
     key : string
         Data column name from `data` to assign values in the map
     legend_label : string
-        String used for the legend label on top of the plot 
+        String used for the legend label on top of the plot
+    scale_type : bool, optional
+        If True, the colormap will be inverted, by default False
 
     Returns
     -------
@@ -55,6 +57,10 @@ def choropleth_folium_yorkshire(geoframe, data, key, legend_label):
 
     data_plot = geoframe.merge(data[["LAD21NM", key]], on="LAD21NM")
 
+    if isinstance(data_plot[key].iloc[0], str):
+        if "%" in data_plot[key].iloc[0]:
+            data_plot[key] = data_plot[key].str.rstrip('%').astype('float')
+    
     map = folium.Map([54, -1.3],
                  zoom_start=8,
                  tiles="Cartodb Positron",
@@ -65,7 +71,10 @@ def choropleth_folium_yorkshire(geoframe, data, key, legend_label):
 
 
     # colormap = linear.YlGn_09.scale(data_plot[key].min(), data_plot[key].max())
-    colormap = LinearColormap(["#ea4862", "#f5c22a", "#5b7c62"], vmin=data_plot[key].min(), vmax=data_plot[key].max())
+    if scale_type == "inverted":
+        colormap = LinearColormap(["#5b7c62", "#f5c22a", "#ea4862"], vmin=data_plot[key].min(), vmax=data_plot[key].max())
+    else:
+        colormap = LinearColormap(["#ea4862", "#f5c22a", "#5b7c62"], vmin=data_plot[key].min(), vmax=data_plot[key].max())
     colormap.caption = legend_label
 
     def cmap_nan(val):
